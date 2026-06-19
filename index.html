@@ -1,0 +1,143 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>VirtuoMate — FYP Presentation</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--cyan:#19d3f2;--blue:#3d6bff;--ink:#05071a;--glass:rgba(15,20,52,.55)}
+html,body{height:100%;background:#05071a;overflow:hidden;font-family:'Poppins','Segoe UI',system-ui,sans-serif;color:#dfe8ff}
+#app{position:fixed;inset:0;background:
+  radial-gradient(1100px 700px at 50% 30%,#101a4e 0%,#0a0e34 55%,#05071a 100%)}
+/* ambient animated layer */
+.amb{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+.amb i{position:absolute;display:block}
+.hexr{border:1.5px solid #2a3c7a55;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
+.h1{width:240px;height:276px;left:-70px;top:55%;animation:spin 70s linear infinite}
+.h2{width:360px;height:414px;right:-120px;top:-120px;animation:spin 95s linear infinite reverse}
+.spk{width:12px;height:12px;background:#bfe9ff;border-radius:1px;
+  clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%);animation:tw 5s infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes tw{0%,100%{opacity:.12;transform:scale(.6)}50%{opacity:.7;transform:scale(1)}}
+/* stage */
+.stage{position:fixed;inset:0;z-index:2;display:flex;align-items:center;justify-content:center}
+.slide{position:absolute;width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+  opacity:0;transform:scale(1.07);filter:brightness(.5) blur(3px);
+  transition:opacity 1s cubic-bezier(.16,.84,.44,1),transform 1.2s cubic-bezier(.16,.84,.44,1),filter 1s ease;
+  visibility:hidden}
+.slide img{max-width:100%;max-height:100%;object-fit:contain;
+  box-shadow:0 30px 90px rgba(0,0,0,.55),0 0 0 1px rgba(80,120,255,.08)}
+.slide:first-child{opacity:1;transform:none;filter:none;visibility:visible}
+.slide.active{opacity:1;transform:scale(1);filter:none;visibility:visible;z-index:3}
+.slide.exit{opacity:0;transform:scale(.94);filter:brightness(.5) blur(2px);visibility:visible;z-index:2}
+/* entrance sweep */
+.sweep{position:fixed;top:0;bottom:0;width:34vw;z-index:4;pointer-events:none;opacity:0;
+  background:linear-gradient(90deg,transparent,rgba(25,211,242,.16),rgba(61,107,255,.05),transparent)}
+.sweep.run{animation:sw 1s ease-out}
+@keyframes sw{0%{left:-40vw;opacity:1}100%{left:110vw;opacity:0}}
+/* HUD */
+.hud{position:fixed;z-index:20}
+.bar{top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,var(--cyan),var(--blue));
+  box-shadow:0 0 14px var(--cyan);transition:width .6s cubic-bezier(.16,.84,.44,1)}
+.nav{top:0;bottom:0;width:16vw;display:flex;align-items:center;cursor:pointer;opacity:0;transition:.3s}
+.nav:hover{opacity:1}.nav.l{left:0;justify-content:flex-start;padding-left:18px}
+.nav.r{right:0;justify-content:flex-end;padding-right:18px}
+.arw{width:54px;height:54px;border-radius:50%;background:var(--glass);backdrop-filter:blur(8px);
+  border:1px solid #2e3e78;color:#cfe;display:flex;align-items:center;justify-content:center;font-size:22px}
+.dock{bottom:20px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:14px;
+  background:var(--glass);backdrop-filter:blur(12px);border:1px solid #2c3a6e;border-radius:40px;
+  padding:8px 16px;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+.dbtn{width:38px;height:38px;border-radius:50%;border:1px solid #34457e;background:#0e1540aa;color:#cfe;
+  cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:.2s}
+.dbtn:hover{background:var(--cyan);color:#05071a;border-color:var(--cyan);box-shadow:0 0 16px var(--cyan)}
+.count{font-size:13px;letter-spacing:.12em;color:#aebbe6;min-width:62px;text-align:center;font-weight:300}
+.count b{color:#fff;font-weight:600}
+.label{position:fixed;bottom:74px;left:50%;transform:translateX(-50%);z-index:20;font-size:12px;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--cyan);opacity:.85;font-weight:500}
+/* filmstrip */
+.strip{position:fixed;left:0;right:0;bottom:0;z-index:25;display:flex;gap:8px;padding:14px 16px;
+  overflow-x:auto;background:linear-gradient(0deg,#05071aee,#05071a00);transform:translateY(110%);
+  transition:transform .35s ease}
+.strip.open{transform:none}
+.thumb{flex:0 0 auto;width:128px;height:72px;border-radius:8px;overflow:hidden;border:1.5px solid #27345f;
+  background:#0a0e2e;cursor:pointer;position:relative;padding:0;transition:.2s}
+.thumb img{width:100%;height:100%;object-fit:cover;opacity:.65;transition:.2s}
+.thumb span{position:absolute;left:5px;bottom:3px;font-size:11px;color:#cfe;text-shadow:0 1px 3px #000}
+.thumb.active{border-color:var(--cyan);box-shadow:0 0 14px #19d3f288}.thumb.active img{opacity:1}
+.thumb:hover img{opacity:1}
+.hint{top:16px;left:18px;color:#8c97c2;font-size:12px;font-weight:300;opacity:.7;z-index:20}
+.tools{top:14px;right:16px;display:flex;gap:9px;z-index:20}
+/* loader */
+.load{position:fixed;inset:0;z-index:60;animation:lfade .8s ease 1.6s forwards;background:#05071a;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:26px;transition:opacity .8s ease}
+.load.done{opacity:0;pointer-events:none}
+.lhex{width:96px;height:110px;background:linear-gradient(135deg,var(--cyan),var(--blue));
+  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);animation:pulse 1.4s ease-in-out infinite}
+@keyframes lfade{to{opacity:0;visibility:hidden;pointer-events:none}}
+@keyframes pulse{0%,100%{transform:scale(.9);filter:drop-shadow(0 0 8px #19d3f255)}50%{transform:scale(1.05);filter:drop-shadow(0 0 28px #19d3f2aa)}}
+.lt{font-size:30px;font-weight:700;letter-spacing:.04em}
+.lsub{font-size:13px;letter-spacing:.3em;color:var(--cyan);text-transform:uppercase}
+@media(max-width:700px){.strip{display:none}.nav{width:30vw}}
+</style></head><body>
+<div id="app"></div>
+<div class="amb"><i class="hexr h1"></i><i class="hexr h2"></i><i class="spk" style="left:34%;top:81%;animation-delay:2.2s"></i><i class="spk" style="left:51%;top:83%;animation-delay:1.9s"></i><i class="spk" style="left:78%;top:14%;animation-delay:2.4s"></i><i class="spk" style="left:64%;top:39%;animation-delay:2.2s"></i><i class="spk" style="left:28%;top:66%;animation-delay:2.2s"></i><i class="spk" style="left:74%;top:66%;animation-delay:1.6s"></i><i class="spk" style="left:23%;top:35%;animation-delay:2.5s"></i><i class="spk" style="left:70%;top:55%;animation-delay:3.0s"></i><i class="spk" style="left:89%;top:14%;animation-delay:0.6s"></i><i class="spk" style="left:79%;top:11%;animation-delay:1.2s"></i><i class="spk" style="left:7%;top:40%;animation-delay:1.9s"></i><i class="spk" style="left:96%;top:55%;animation-delay:2.9s"></i><i class="spk" style="left:58%;top:56%;animation-delay:2.9s"></i><i class="spk" style="left:77%;top:62%;animation-delay:3.9s"></i><i class="spk" style="left:21%;top:52%;animation-delay:0.4s"></i><i class="spk" style="left:21%;top:69%;animation-delay:0.9s"></i></div>
+<noscript><div style='position:fixed;inset:0;z-index:99;background:#05071a;color:#cfe;display:flex;align-items:center;justify-content:center;font-family:sans-serif'>Please enable JavaScript, or open in a modern browser.</div></noscript>
+<div class="stage" id="stage"><div class="slide" data-i="0"><img src="assets/slide-01.jpg" alt="Title"></div><div class="slide" data-i="1"><img src="assets/slide-02.jpg" alt="Team"></div><div class="slide" data-i="2"><img src="assets/slide-03.jpg" alt="Agenda"></div><div class="slide" data-i="3"><img src="assets/slide-04.jpg" alt="Problem Statement"></div><div class="slide" data-i="4"><img src="assets/slide-05.jpg" alt="Aims & Objectives"></div><div class="slide" data-i="5"><img src="assets/slide-06.jpg" alt="In-Scope"></div><div class="slide" data-i="6"><img src="assets/slide-07.jpg" alt="Out-of-Scope"></div><div class="slide" data-i="7"><img src="assets/slide-08.jpg" alt="Business Goals"></div><div class="slide" data-i="8"><img src="assets/slide-09.jpg" alt="Target Audience"></div><div class="slide" data-i="9"><img src="assets/slide-10.jpg" alt="Competitor Analysis"></div><div class="slide" data-i="10"><img src="assets/slide-11.jpg" alt="Tech Stack"></div><div class="slide" data-i="11"><img src="assets/slide-12.jpg" alt="Technology Selection"></div><div class="slide" data-i="12"><img src="assets/slide-13.jpg" alt="Methodology"></div><div class="slide" data-i="13"><img src="assets/slide-14.jpg" alt="Architecture Diagram"></div><div class="slide" data-i="14"><img src="assets/slide-15.jpg" alt="ERD"></div><div class="slide" data-i="15"><img src="assets/slide-16.jpg" alt="Class Diagram"></div><div class="slide" data-i="16"><img src="assets/slide-17.jpg" alt="RESULTS"></div><div class="slide" data-i="17"><img src="assets/slide-18.jpg" alt="Authentication"></div><div class="slide" data-i="18"><img src="assets/slide-19.jpg" alt="Dashboard"></div><div class="slide" data-i="19"><img src="assets/slide-20.jpg" alt="AI Voice Coaching"></div><div class="slide" data-i="20"><img src="assets/slide-21.jpg" alt="AI Interview Practice"></div><div class="slide" data-i="21"><img src="assets/slide-22.jpg" alt="Presentation Feedback"></div><div class="slide" data-i="22"><img src="assets/slide-23.jpg" alt="Avatar Management"></div><div class="slide" data-i="23"><img src="assets/slide-24.jpg" alt="Video CV"></div><div class="slide" data-i="24"><img src="assets/slide-25.jpg" alt="Analytics & Reports"></div><div class="slide" data-i="25"><img src="assets/slide-26.jpg" alt="Subscription & Payment"></div><div class="slide" data-i="26"><img src="assets/slide-27.jpg" alt="Profile & Settings"></div><div class="slide" data-i="27"><img src="assets/slide-28.jpg" alt="Key Challenges"></div><div class="slide" data-i="28"><img src="assets/slide-29.jpg" alt="VirtuoMate is Live"></div><div class="slide" data-i="29"><img src="assets/slide-30.jpg" alt="Test Results"></div><div class="slide" data-i="30"><img src="assets/slide-31.jpg" alt="Completion Status"></div><div class="slide" data-i="31"><img src="assets/slide-32.jpg" alt="Conclusion"></div><div class="slide" data-i="32"><img src="assets/slide-33.jpg" alt="DIAGRAMS"></div><div class="slide" data-i="33"><img src="assets/slide-34.jpg" alt="Sequence Diagram"></div><div class="slide" data-i="34"><img src="assets/slide-35.jpg" alt="Sequence Diagram"></div><div class="slide" data-i="35"><img src="assets/slide-36.jpg" alt="DFD Level 0"></div><div class="slide" data-i="36"><img src="assets/slide-37.jpg" alt="DFD Level 1"></div><div class="slide" data-i="37"><img src="assets/slide-38.jpg" alt="Detailed Sequence"></div><div class="slide" data-i="38"><img src="assets/slide-39.jpg" alt="Component F/B"></div><div class="slide" data-i="39"><img src="assets/slide-40.jpg" alt="AI & Data Layers"></div><div class="slide" data-i="40"><img src="assets/slide-41.jpg" alt="External & Components"></div><div class="slide" data-i="41"><img src="assets/slide-42.jpg" alt="Entities & Workflow"></div><div class="slide" data-i="42"><img src="assets/slide-43.jpg" alt="Thank You"></div></div>
+<div class="sweep" id="sweep"></div>
+<div class="hud bar" id="bar"></div>
+<div class="hud nav l" id="nl"><div class="arw">&#8249;</div></div>
+<div class="hud nav r" id="nr"><div class="arw">&#8250;</div></div>
+<div class="hud hint">← → · click · swipe &nbsp;|&nbsp; F fullscreen · G slides</div>
+<div class="hud tools"><button class="dbtn" id="fs" title="Fullscreen (F)">&#9974;</button></div>
+<div class="hud label" id="lab"></div>
+<div class="hud dock">
+  <button class="dbtn" id="prev" title="Previous">&#8249;</button>
+  <button class="dbtn" id="play" title="Autoplay">&#9654;</button>
+  <button class="dbtn" id="fwd" title="Next">&#8250;</button>
+  <span class="count"><b id="cur">01</b> / 43</span>
+  <button class="dbtn" id="grid" title="All slides (G)">&#9783;</button>
+</div>
+<div class="strip" id="strip"><button class="thumb" data-i="0"><img src="assets/slide-01.jpg" loading="lazy"><span>1</span></button><button class="thumb" data-i="1"><img src="assets/slide-02.jpg" loading="lazy"><span>2</span></button><button class="thumb" data-i="2"><img src="assets/slide-03.jpg" loading="lazy"><span>3</span></button><button class="thumb" data-i="3"><img src="assets/slide-04.jpg" loading="lazy"><span>4</span></button><button class="thumb" data-i="4"><img src="assets/slide-05.jpg" loading="lazy"><span>5</span></button><button class="thumb" data-i="5"><img src="assets/slide-06.jpg" loading="lazy"><span>6</span></button><button class="thumb" data-i="6"><img src="assets/slide-07.jpg" loading="lazy"><span>7</span></button><button class="thumb" data-i="7"><img src="assets/slide-08.jpg" loading="lazy"><span>8</span></button><button class="thumb" data-i="8"><img src="assets/slide-09.jpg" loading="lazy"><span>9</span></button><button class="thumb" data-i="9"><img src="assets/slide-10.jpg" loading="lazy"><span>10</span></button><button class="thumb" data-i="10"><img src="assets/slide-11.jpg" loading="lazy"><span>11</span></button><button class="thumb" data-i="11"><img src="assets/slide-12.jpg" loading="lazy"><span>12</span></button><button class="thumb" data-i="12"><img src="assets/slide-13.jpg" loading="lazy"><span>13</span></button><button class="thumb" data-i="13"><img src="assets/slide-14.jpg" loading="lazy"><span>14</span></button><button class="thumb" data-i="14"><img src="assets/slide-15.jpg" loading="lazy"><span>15</span></button><button class="thumb" data-i="15"><img src="assets/slide-16.jpg" loading="lazy"><span>16</span></button><button class="thumb" data-i="16"><img src="assets/slide-17.jpg" loading="lazy"><span>17</span></button><button class="thumb" data-i="17"><img src="assets/slide-18.jpg" loading="lazy"><span>18</span></button><button class="thumb" data-i="18"><img src="assets/slide-19.jpg" loading="lazy"><span>19</span></button><button class="thumb" data-i="19"><img src="assets/slide-20.jpg" loading="lazy"><span>20</span></button><button class="thumb" data-i="20"><img src="assets/slide-21.jpg" loading="lazy"><span>21</span></button><button class="thumb" data-i="21"><img src="assets/slide-22.jpg" loading="lazy"><span>22</span></button><button class="thumb" data-i="22"><img src="assets/slide-23.jpg" loading="lazy"><span>23</span></button><button class="thumb" data-i="23"><img src="assets/slide-24.jpg" loading="lazy"><span>24</span></button><button class="thumb" data-i="24"><img src="assets/slide-25.jpg" loading="lazy"><span>25</span></button><button class="thumb" data-i="25"><img src="assets/slide-26.jpg" loading="lazy"><span>26</span></button><button class="thumb" data-i="26"><img src="assets/slide-27.jpg" loading="lazy"><span>27</span></button><button class="thumb" data-i="27"><img src="assets/slide-28.jpg" loading="lazy"><span>28</span></button><button class="thumb" data-i="28"><img src="assets/slide-29.jpg" loading="lazy"><span>29</span></button><button class="thumb" data-i="29"><img src="assets/slide-30.jpg" loading="lazy"><span>30</span></button><button class="thumb" data-i="30"><img src="assets/slide-31.jpg" loading="lazy"><span>31</span></button><button class="thumb" data-i="31"><img src="assets/slide-32.jpg" loading="lazy"><span>32</span></button><button class="thumb" data-i="32"><img src="assets/slide-33.jpg" loading="lazy"><span>33</span></button><button class="thumb" data-i="33"><img src="assets/slide-34.jpg" loading="lazy"><span>34</span></button><button class="thumb" data-i="34"><img src="assets/slide-35.jpg" loading="lazy"><span>35</span></button><button class="thumb" data-i="35"><img src="assets/slide-36.jpg" loading="lazy"><span>36</span></button><button class="thumb" data-i="36"><img src="assets/slide-37.jpg" loading="lazy"><span>37</span></button><button class="thumb" data-i="37"><img src="assets/slide-38.jpg" loading="lazy"><span>38</span></button><button class="thumb" data-i="38"><img src="assets/slide-39.jpg" loading="lazy"><span>39</span></button><button class="thumb" data-i="39"><img src="assets/slide-40.jpg" loading="lazy"><span>40</span></button><button class="thumb" data-i="40"><img src="assets/slide-41.jpg" loading="lazy"><span>41</span></button><button class="thumb" data-i="41"><img src="assets/slide-42.jpg" loading="lazy"><span>42</span></button><button class="thumb" data-i="42"><img src="assets/slide-43.jpg" loading="lazy"><span>43</span></button></div>
+<div class="load" id="load"><div class="lhex"></div><div class="lt">VirtuoMate</div><div class="lsub">Initializing Presentation</div></div>
+<script>
+const slides=[...document.querySelectorAll('.slide')];
+const thumbs=[...document.querySelectorAll('.thumb')];
+const titles=["Title", "Team", "Agenda", "Problem Statement", "Aims & Objectives", "In-Scope", "Out-of-Scope", "Business Goals", "Target Audience", "Competitor Analysis", "Tech Stack", "Technology Selection", "Methodology", "Architecture Diagram", "ERD", "Class Diagram", "RESULTS", "Authentication", "Dashboard", "AI Voice Coaching", "AI Interview Practice", "Presentation Feedback", "Avatar Management", "Video CV", "Analytics & Reports", "Subscription & Payment", "Profile & Settings", "Key Challenges", "VirtuoMate is Live", "Test Results", "Completion Status", "Conclusion", "DIAGRAMS", "Sequence Diagram", "Sequence Diagram", "DFD Level 0", "DFD Level 1", "Detailed Sequence", "Component F/B", "AI & Data Layers", "External & Components", "Entities & Workflow", "Thank You"];
+let cur=0,prev=0,playing=false,timer=null;
+const sweep=document.getElementById('sweep');
+function render(){
+  slides.forEach((s,i)=>{s.classList.remove('active','exit');});
+  if(prev!==cur){slides[prev].classList.add('exit');}
+  slides[cur].classList.add('active');
+  document.getElementById('bar').style.width=((cur+1)/slides.length*100)+'%';
+  document.getElementById('cur').textContent=String(cur+1).padStart(2,'0');
+  document.getElementById('lab').textContent=titles[cur]||'';
+  thumbs.forEach((t,i)=>t.classList.toggle('active',i===cur));
+  const at=thumbs[cur]; if(at) at.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});
+  sweep.classList.remove('run'); void sweep.offsetWidth; sweep.classList.add('run');
+}
+function go(n){ n=Math.max(0,Math.min(slides.length-1,n)); if(n===cur)return; prev=cur; cur=n; render(); }
+function next(){ if(cur<slides.length-1) go(cur+1); else if(playing) stop(); }
+function back(){ go(cur-1); }
+function stop(){playing=false;clearInterval(timer);document.getElementById('play').innerHTML='&#9654;';}
+function play(){playing=true;document.getElementById('play').innerHTML='&#10074;&#10074;';
+  timer=setInterval(()=>{ if(cur>=slides.length-1){stop();return;} next(); },6500);}
+function fs(){ if(!document.fullscreenElement)document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
+addEventListener('keydown',e=>{
+  if(['ArrowRight','ArrowDown',' ','PageDown'].includes(e.key)){e.preventDefault();next();}
+  else if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();back();}
+  else if(e.key==='Home')go(0); else if(e.key==='End')go(slides.length-1);
+  else if(e.key==='f'||e.key==='F')fs();
+  else if(e.key==='g'||e.key==='G')document.getElementById('strip').classList.toggle('open');
+});
+document.getElementById('nl').onclick=back;
+document.getElementById('nr').onclick=next;
+document.getElementById('prev').onclick=back;
+document.getElementById('play').onclick=()=>playing?stop():play();
+document.getElementById('fwd').onclick=next;
+document.getElementById('fs').onclick=fs;
+document.getElementById('grid').onclick=()=>document.getElementById('strip').classList.toggle('open');
+thumbs.forEach(t=>t.onclick=()=>{go(+t.dataset.i);});
+let sx=0; const stg=document.getElementById('stage');
+stg.addEventListener('touchstart',e=>sx=e.touches[0].clientX,{passive:true});
+stg.addEventListener('touchend',e=>{let dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>50)dx<0?next():back();});
+render();
+setTimeout(()=>{document.getElementById('load').classList.add('done');},1300);
+</script></body></html>
